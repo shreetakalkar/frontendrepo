@@ -524,7 +524,7 @@
 
 import './chartConfig';
 import { Routes, Route, Navigate } from 'react-router-dom'; 
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Home from './components/Home';
@@ -534,39 +534,21 @@ import Orders from "./components/Order/Orders";
 import Settings from './components/Settings';
 import Request from './components/Request';
 import Plans from './components/Plans';
-import SignIn from './components/SignIn';
-import ForgotPassword from './components/SignIn/ForgotPassword';
-import OTPForReset from './components/SignIn/OTPForReset';
 import Webform from './components/Webform';
-import OTPVerification from './components/OTPVerification';
-import ScrollToTop from './components/ScrollToTop';
-import Register from './components/Register';
 import ShopifySync from './components/ShopifySync/ShopifySync';
 import ShopifyProducts from './components/ShopifySync/ShopifyProducts';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
-  const [isSyncComplete, setIsSyncComplete] = useState(null);
-
+  // Redirect to /inventory on load
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('authToken');
-      const syncStatus = localStorage.getItem('syncComplete');
-
-      setIsAuthenticated(!!token);
-      setIsSyncComplete(syncStatus === 'true');
-    };
-
-    checkAuth();
-    window.addEventListener('storage', checkAuth);
-
-    return () => {
-      window.removeEventListener('storage', checkAuth);
-    };
+    if (window.location.pathname === "/") {
+      window.location.replace("/inventory");
+    }
   }, []);
 
-  // Layout for authenticated users
-  const AuthenticatedLayout = ({ children }) => (
+  // Layout for pages
+  const MainLayout = ({ children }) => (
     <>
       <Header />
       <Sidebar />
@@ -574,53 +556,21 @@ function App() {
     </>
   );
 
-  // Memoize routes to prevent unnecessary re-renders
-  const routes = useMemo(() => {
-    if (isAuthenticated === null || isSyncComplete === null) return null; 
-
-    if (!isAuthenticated) {
-      return (
-        <Routes>
-          <Route path="/signup" element={<Register />} />
-          <Route path="/otp-verification" element={<OTPVerification />} />
-          <Route path="/login" element={<SignIn setIsAuthenticated={setIsAuthenticated} />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/otp-reset" element={<OTPForReset />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      );
-    }
-
-    if (!isSyncComplete) {
-      return (
-        <Routes>
-          <Route path="/shopify-sync" element={<ShopifySync />} />
-          <Route path="*" element={<Navigate to="/shopify-sync" replace />} />
-        </Routes>
-      );
-    }
-
-    return (
-      <Routes>
-        <Route path="/" element={<Navigate to="/inventory" replace />} /> {/* Changed Default Route */}
-        <Route path="/inventory" element={<AuthenticatedLayout><Inventory /></AuthenticatedLayout>} />
-        <Route path="/order/*" element={<AuthenticatedLayout><Orders /></AuthenticatedLayout>} />
-        <Route path="/settings" element={<AuthenticatedLayout><Settings /></AuthenticatedLayout>} />
-        <Route path="/request" element={<AuthenticatedLayout><Request /></AuthenticatedLayout>} />
-        <Route path="/plans" element={<AuthenticatedLayout><Plans /></AuthenticatedLayout>} />
-        <Route path="/webform" element={<AuthenticatedLayout><Webform /></AuthenticatedLayout>} />
-        <Route path="/shopify-products" element={<AuthenticatedLayout><ShopifyProducts /></AuthenticatedLayout>} />
-        <Route path="*" element={<Navigate to="/inventory" replace />} /> {/* Redirect all unknown paths */}
-      </Routes>
-    );
-  }, [isAuthenticated, isSyncComplete]);
-
-  if (routes === null) return null; 
-
   return (
     <SidebarProvider>
       <ScrollToTop />
-      {routes}
+      <Routes>
+        <Route path="/inventory" element={<MainLayout><Inventory /></MainLayout>} />
+        <Route path="/order/*" element={<MainLayout><Orders /></MainLayout>} />
+        <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
+        <Route path="/request" element={<MainLayout><Request /></MainLayout>} />
+        <Route path="/plans" element={<MainLayout><Plans /></MainLayout>} />
+        <Route path="/webform" element={<MainLayout><Webform /></MainLayout>} />
+        <Route path="/shopify-sync" element={<MainLayout><ShopifySync /></MainLayout>} />
+        <Route path="/shopify-products" element={<MainLayout><ShopifyProducts /></MainLayout>} />
+        <Route path="/" element={<Navigate to="/inventory" replace />} />
+        <Route path="*" element={<Navigate to="/inventory" replace />} />
+      </Routes>
     </SidebarProvider>
   );
 }
