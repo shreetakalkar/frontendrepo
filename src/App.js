@@ -602,7 +602,7 @@ function App() {
 
     return (
       <Routes>
-        <Route path="/" element={<AuthenticatedLayout><Home /></AuthenticatedLayout>} />
+        <Route path="/" element={<Navigate to="/inventory" replace />} /> {/* Changed Default Route */}
         <Route path="/inventory" element={<AuthenticatedLayout><Inventory /></AuthenticatedLayout>} />
         <Route path="/order/*" element={<AuthenticatedLayout><Orders /></AuthenticatedLayout>} />
         <Route path="/settings" element={<AuthenticatedLayout><Settings /></AuthenticatedLayout>} />
@@ -610,7 +610,7 @@ function App() {
         <Route path="/plans" element={<AuthenticatedLayout><Plans /></AuthenticatedLayout>} />
         <Route path="/webform" element={<AuthenticatedLayout><Webform /></AuthenticatedLayout>} />
         <Route path="/shopify-products" element={<AuthenticatedLayout><ShopifyProducts /></AuthenticatedLayout>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/inventory" replace />} /> {/* Redirect all unknown paths */}
       </Routes>
     );
   }, [isAuthenticated, isSyncComplete]);
